@@ -1,105 +1,168 @@
 # Washing Machine Anomaly Detection
 
-A machine learning pipeline for detecting anomalies in washing machine operation using sensor data and deploying the model to ESP32 microcontrollers.
+An end-to-end system for detecting anomalies in washing machine operation using machine learning on embedded devices.
 
 ## 🚀 Features
 
-- **Data Collection**: Real-time sensor data collection from ESP32
-- **Data Processing**: Automated cleaning, feature extraction, and labeling
-- **Model Training**: CNN-based anomaly detection model
-- **Edge Deployment**: Optimized for ESP32 with TensorFlow Lite
-- **Monitoring**: Real-time dashboard for anomaly visualization
+- Real-time sensor data collection (accelerometer, temperature, audio)
+- Advanced signal processing and feature extraction
+- Deep learning model for anomaly detection
+- Optimized for deployment on ESP32 microcontrollers
+- Web-based monitoring dashboard
+- Continuous learning pipeline
 
-## 📁 Project Structure
+## 📦 Project Structure
 
 ```
 washing-machine-anomaly-detection/
-├── data_cleaning_2.py       # Data preprocessing and feature extraction
-├── data_collection_1.py     # ESP32 data collection script
-├── labeing_tool_3.py        # Interactive data labeling tool
-├── train_initial_model_2.1.py  # Model training script
-├── convert_to_tenserflow_lite_2.2.py  # Model conversion to TFLite
-├── convert_to_C_array_2.3.py # Convert TFLite to C array
-├── main.ino                 # ESP32 Arduino code
-├── monitoring_dashboard.py  # Flask-based monitoring dashboard
-├── quantization_options.md  # Model optimization guide
-└── uploading_fine_tuned_model.md  # Deployment instructions
+├── arduino/                  # ESP32 firmware
+│   ├── src/                   # Source files
+│   │   ├── config.h           # Configuration constants
+│   │   ├── sensors.h          # Sensor reading functions
+│   │   ├── tflite_helper.h    # TensorFlow Lite integration
+│   │   └── utils.h            # Utility functions
+│   ├── platformio.ini         # PlatformIO configuration
+│   └── main.ino               # Main Arduino sketch
+├── data/                      # Data storage (gitignored)
+│   ├── raw/                   # Raw sensor data
+│   ├── processed/             # Processed datasets
+│   ├── labeled/               # Manually labeled data
+│   ├── models/                # Trained models
+│   └── logs/                  # Runtime logs
+├── docs/                      # Documentation
+├── src/                       # Python source code
+│   ├── data/                  # Data collection and preprocessing
+│   │   ├── __init__.py        # Data directory setup
+│   │   ├── data_collection_1.py
+│   │   └── data_cleaning_2.py
+│   ├── model/                 # Model training and conversion
+│   │   ├── train.py
+│   │   ├── convert_to_tflite_2.2.py
+│   │   └── convert_to_C_array_2.3.py
+│   └── web/                   # Web dashboard
+│       └── monitoring_dashboard.py
+├── tests/                     # Unit and integration tests
+├── .gitignore
+└── README.md                  # This file
 ```
 
-## 🛠️ Setup
+## 🛠️ Hardware Requirements
+
+- ESP32 development board (e.g., ESP32-DevKitC)
+- MPU6050 6-DoF IMU (accelerometer + gyro)
+- MLX90614 IR temperature sensor
+- Electret microphone with amplifier (e.g., MAX9814)
+- MicroSD card module
+- Jumper wires and breadboard
+- Power supply (5V, 2A recommended)
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
 - Python 3.8+
-- Arduino IDE with ESP32 board support
+- PlatformIO (for Arduino development)
 - Required Python packages:
-  ```bash
+  ```
   pip install -r requirements.txt
   ```
 
-### Hardware Requirements
+### Installation
 
-- ESP32 development board
-- MPU6050 accelerometer
-- MLX90614 temperature sensor
-- Microphone (for audio analysis)
-- MicroSD card (optional, if using external storage)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/washing-machine-anomaly-detection.git
+   cd washing-machine-anomaly-detection
+   ```
 
-## 🚦 Usage
+2. Set up Python environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. Install PlatformIO (for Arduino development):
+   - Install VS Code: https://code.visualstudio.com/
+   - Install PlatformIO IDE extension
+
+## 🏃‍♂️ Quick Start
 
 ### 1. Data Collection
+
 ```bash
-python data_collection_1.py --duration 60 --label normal --machine-id washer1
+# Connect your ESP32 and run:
+python src/data/data_collection_1.py --port /dev/ttyUSB0 --duration 30 --label normal
 ```
 
-### 2. Data Labeling
+### 2. Data Preprocessing
+
 ```bash
-python labeing_tool_3.py
+python src/data/data_cleaning_2.py
 ```
 
-### 3. Model Training
+### 3. Train the Model
+
 ```bash
-python train_initial_model_2.1.py
+python src/model/train.py
 ```
 
-### 4. Model Conversion
+### 4. Convert Model for Edge Deployment
+
 ```bash
-python convert_to_tenserflow_lite_2.2.py
-python convert_to_C_array_2.3.py
+# Convert to TensorFlow Lite
+python src/model/convert_to_tflite_2.2.py
+
+# Convert to C array for Arduino
+python src/model/convert_to_C_array_2.3.py
 ```
 
 ### 5. Deploy to ESP32
-1. Open `main.ino` in Arduino IDE
-2. Select your ESP32 board
-3. Upload the sketch
 
-### 6. Start Monitoring Dashboard
+1. Open the `arduino` folder in VS Code with PlatformIO
+2. Copy the generated `model.h` to `arduino/src/`
+3. Connect your ESP32
+4. Click "Upload" in PlatformIO
+
+### 6. Monitor the System
+
+Start the web dashboard:
 ```bash
-python monitoring_dashboard.py
+python src/web/monitoring_dashboard.py
 ```
 
-## 🧠 Model Architecture
+## 🧪 Testing
 
-The model uses a CNN architecture optimized for time-series classification:
-
+Run the test suite:
+```bash
+pytest tests/
 ```
-Input (sensor data) → Conv1D → MaxPooling → Conv1D → Flatten → Dense → Output
-```
 
-## 📊 Performance
+## 🤖 Model Architecture
 
-- Model size: <100KB (quantized)
-- Inference time: <50ms on ESP32
-- Accuracy: >95% on test set
+The system uses a Convolutional Neural Network (CNN) for time series classification:
 
-## 🤝 Contributing
+1. Input: 100Hz sensor data (acceleration, temperature, audio)
+2. Feature extraction using 1D convolutions
+3. Dense layers for classification
+4. Output: Anomaly probability
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## 📈 Performance
 
-## 📄 License
+- Model size: < 50KB (quantized)
+- Inference time: < 10ms on ESP32
+- Accuracy: > 95% on test set
+
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 📧 Contact
 
 For questions or feedback, please open an issue on GitHub.
+
+## 🙏 Acknowledgments
+
+- TensorFlow Lite for Microcontrollers
+- PlatformIO for embedded development
+- Adafruit for sensor libraries

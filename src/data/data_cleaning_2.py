@@ -1,5 +1,5 @@
-# preprocess_data.py
-import os
+"""Data preprocessing module for washing machine sensor data."""
+from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy import signal
@@ -7,17 +7,25 @@ import pywt
 from tqdm import tqdm
 import json
 import glob
+import sys
+
+# Add project root to path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.append(str(PROJECT_ROOT))
+
+from src.data import DATA_DIR
 
 class WashingMachineDataPreprocessor:
-    def __init__(self, data_dir='collected_data'):
-        self.data_dir = data_dir
-        self.raw_dir = os.path.join(data_dir, 'raw')
-        self.processed_dir = os.path.join(data_dir, 'processed')
-        os.makedirs(self.processed_dir, exist_ok=True)
+    def __init__(self, data_dir=None):
+        self.data_dir = data_dir if data_dir else DATA_DIR
+        self.raw_dir = self.data_dir / 'raw'
+        self.processed_dir = self.data_dir / 'processed'
+        self.raw_dir.mkdir(parents=True, exist_ok=True)
+        self.processed_dir.mkdir(parents=True, exist_ok=True)
         
     def load_raw_data(self, file_pattern='*.parquet'):
         """Load all raw data files matching pattern"""
-        files = glob.glob(os.path.join(self.raw_dir, file_pattern))
+        files = list(self.raw_dir.glob(file_pattern))
         if not files:
             raise FileNotFoundError(f"No files found matching {file_pattern}")
             
@@ -28,7 +36,7 @@ class WashingMachineDataPreprocessor:
                 df = pd.read_parquet(file)
                 
                 # Load corresponding metadata
-                metadata_file = file.replace('.parquet', '_metadata.json')
+                metadata_file = file.with_suffix('').with_suffix('_metadata.json')
                 with open(metadata_file, 'r') as f:
                     metadata = json.load(f)
                 

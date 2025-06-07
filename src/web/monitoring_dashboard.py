@@ -1,9 +1,16 @@
-# dashboard.py
+"""Flask web dashboard for monitoring washing machine status."""
+from pathlib import Path
 from flask import Flask, render_template, jsonify
 import pandas as pd
-import os
 from datetime import datetime, timedelta
 import json
+import sys
+
+# Add project root to path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.append(str(PROJECT_ROOT))
+
+from src.data import DATA_DIR
 
 app = Flask(__name__)
 
@@ -14,13 +21,14 @@ def dashboard():
 @app.route('/api/data')
 def get_data():
     # Read the latest log file
-    log_dir = 'collected_data/logs'
-    log_files = sorted([f for f in os.listdir(log_dir) if f.endswith('.csv')])
+    log_dir = DATA_DIR / 'logs'
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_files = sorted(log_dir.glob('*.csv'))
     
     if not log_files:
         return jsonify({"error": "No log files found"}), 404
     
-    latest_log = os.path.join(log_dir, log_files[-1])
+    latest_log = log_files[-1]
     df = pd.read_csv(latest_log)
     
     # Get data from last hour

@@ -1,4 +1,4 @@
-# collect_washing_machine_data.py
+"""Data collection module for washing machine sensor data."""
 import serial
 import numpy as np
 import pandas as pd
@@ -6,10 +6,17 @@ from datetime import datetime
 import time
 import json
 import os
+from pathlib import Path
 from tqdm import tqdm
 
+# Project root directory
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+DATA_DIR = PROJECT_ROOT / 'data'
+
 class WashingMachineDataCollector:
-    def __init__(self, port, baudrate=115200, output_dir='collected_data'):
+    def __init__(self, port, baudrate=115200, output_dir=None):
+        if output_dir is None:
+            output_dir = DATA_DIR
         self.port = port
         self.baudrate = baudrate
         self.output_dir = output_dir
@@ -18,9 +25,9 @@ class WashingMachineDataCollector:
     def setup_directories(self):
         """Create necessary directories for data storage"""
         os.makedirs(self.output_dir, exist_ok=True)
-        os.makedirs(os.path.join(self.output_dir, 'raw'), exist_ok=True)
-        os.makedirs(os.path.join(self.output_dir, 'processed'), exist_ok=True)
-        os.makedirs(os.path.join(self.output_dir, 'labeled'), exist_ok=True)
+        os.makedirs(self.output_dir / 'raw', exist_ok=True)
+        os.makedirs(self.output_dir / 'processed', exist_ok=True)
+        os.makedirs(self.output_dir / 'labeled', exist_ok=True)
         
     def connect_serial(self):
         """Establish serial connection to ESP32"""
