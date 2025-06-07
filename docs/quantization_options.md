@@ -1,24 +1,28 @@
-Quantization Options
-Post-Training Quantization (Easiest)
-Converts weights from float32 to int8
-Minimal accuracy loss (typically <2% for most models)
-4x size reduction
-Already implemented in your convert_to_tflite.py
-Full Integer Quantization
-Converts both weights and activations to int8
-Requires a representative dataset for calibration
-Up to 4x size reduction
-Best for CPU-only targets
-Float16 Quantization
-Converts to 16-bit floats
-2x size reduction
-Minimal accuracy loss
-Good for GPUs that support float16
-How to Apply Quantization
-Your existing convert_to_tflite.py already has good quantization. Here's how to enhance it:
+# Quantization Options for TensorFlow Lite Models
 
-python
-CopyInsert
+## 1. Post-Training Quantization (Easiest)
+- Converts weights from float32 to int8
+- Minimal accuracy loss (typically <2% for most models)
+- 4x size reduction
+- Already implemented in your `convert_to_tflite.py`
+
+## 2. Full Integer Quantization
+- Converts both weights and activations to int8
+- Requires a representative dataset for calibration
+- Up to 4x size reduction
+- Best for CPU-only targets
+
+## 3. Float16 Quantization
+- Converts to 16-bit floats
+- 2x size reduction
+- Minimal accuracy loss
+- Good for GPUs that support float16
+
+## How to Apply Quantization
+
+Your existing `convert_to_tflite.py` already has good quantization. Here's how to enhance it:
+
+```python
 # In convert_to_tflite.py
 def convert_to_tflite(model_path, output_path="model_quant.tflite"):
     # Load your model
@@ -54,38 +58,50 @@ def convert_to_tflite(model_path, output_path="model_quant.tflite"):
     print(f"Model size: {size_kb:.2f} KB")
     
     return tflite_model
-Additional Size Reduction Techniques
-If quantization alone isn't enough:
+```
 
-Pruning
-python
-CopyInsert
+## Additional Size Reduction Techniques
+
+If quantization alone isn't enough, consider these techniques:
+
+### 1. Pruning
+
+```python
 import tensorflow_model_optimization as tfmot
-pruning_params = {'pruning_schedule': 
-                 tfmot.sparsity.keras.PolynomialDecay(
-                     initial_sparsity=0.50,
-                     final_sparsity=0.80,
-                     begin_step=0,
-                     end_step=1000)
-                }
+
+pruning_params = {
+    'pruning_schedule': tfmot.sparsity.keras.PolynomialDecay(
+        initial_sparsity=0.50,
+        final_sparsity=0.80,
+        begin_step=0,
+        end_step=1000
+    )
+}
+
 model = tf.keras.Sequential([...])
 model = tfmot.sparsity.keras.prune_low_magnitude(model, **pruning_params)
 # Train with pruning
-Architecture Optimization
-Reduce number of neurons/layers
-Use depthwise separable convolutions
-Decrease input dimensions
-Model Distillation
+```
+
+### 2. Architecture Optimization
+- Reduce number of neurons/layers
+- Use depthwise separable convolutions
+- Decrease input dimensions
+
+### 3. Model Distillation
 Train a smaller "student" model to mimic a larger "teacher" model
-Checking Model Size
-After conversion, check the size:
 
-bash
-CopyInsert in Terminal
+## Checking Model Size
+
+After conversion, check the size using:
+
+```bash
 ls -lh model_quant.tflite
-ESP32-S3 Consideration
-If you're still having size issues, the ESP32-S3 has:
+```
 
-More flash memory (up to 16MB)
-Better support for vector instructions
-Built-in USB for easier deployment
+## ESP32-S3 Consideration
+
+If you're still having size issues, the ESP32-S3 offers:
+- More flash memory (up to 16MB)
+- Better support for vector instructions
+- Built-in USB for easier deployment
